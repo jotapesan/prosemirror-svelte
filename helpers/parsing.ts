@@ -1,17 +1,19 @@
-import { EditorState } from "prosemirror-state"
-import { Mark, NodeType } from "prosemirror-model"
+import type { EditorState } from "prosemirror-state"
+import type { Mark, NodeType } from "prosemirror-model"
+import type { MarkType } from "prosemirror-model"
+import type { ResolvedPos } from "prosemirror-model"
 
-const mapFromMarks = marks => {
+const mapFromMarks = (marks:readonly Mark[]|null):{[key: string]: Mark}|null => {
   if(!marks) return null
   
-  const map = {}
+  const map:{[key: string]: Mark} = {}
   for (let i = 0; i < marks.length; i++) {
     map[marks[i].type.name] = marks[i]
   }
   return map
 }
 
-const getMarksForResolvedPosition = resolvedPosition => {
+const getMarksForResolvedPosition = (resolvedPosition:ResolvedPos) => {
   const marks = resolvedPosition.marks()
   return mapFromMarks(marks)
 }
@@ -21,10 +23,10 @@ const getMarksForResolvedPosition = resolvedPosition => {
  * @param editorState {EditorState}
  * @return {{activeMarks: Object<string,Mark>, marksInSelection: Object<string,Mark>,, marksAtHead: Object<string,Mark>, storedMarks: Object}}
  */
-export const getCurrentMarks = (editorState) => {
+export const getCurrentMarks = (editorState:EditorState) => {
   const {$head, empty, from, to} = editorState.selection
   
-  let marksInSelection = {}
+  let marksInSelection:{[key: string]: Mark} = {}
   
   const storedMarks = mapFromMarks(editorState.storedMarks)
   const marksAtHead = getMarksForResolvedPosition($head)
@@ -52,7 +54,7 @@ export const getCurrentMarks = (editorState) => {
  * @param editorState {EditorState}
  * @returns {{type: NodeType, attrs: Object}}
  */
-export const getNodeTypeAtSelectionHead = (editorState) => {
+export const getNodeTypeAtSelectionHead = (editorState:EditorState) => {
   const {$head} = editorState.selection
   const node = $head.node()
   

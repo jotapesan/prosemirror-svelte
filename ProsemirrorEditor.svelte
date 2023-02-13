@@ -1,8 +1,7 @@
-<script>
+<script lang="ts">
   import { onMount, onDestroy, createEventDispatcher } from 'svelte'
   import { createSingleLineEditor } from './state'
   import { EditorView } from "prosemirror-view"
-  import { EditorState } from "prosemirror-state"
 
   const dispatch = createEventDispatcher()
 

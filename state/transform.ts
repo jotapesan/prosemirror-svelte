@@ -1,12 +1,14 @@
-import {EditorState, TextSelection, AllSelection} from "prosemirror-state";
+import { EditorState, TextSelection, AllSelection } from "prosemirror-state";
 import * as commands from "prosemirror-commands";
+import { undo, redo } from "prosemirror-history";
+import type { Transaction } from "prosemirror-state";
 
 /**
  * Basic implementation to split the editor state at the current selection
  * @param editorState
  * @return {EditorState}
  */
-export const split = editorState => {
+export const split = (editorState: EditorState) => {
   const transaction = editorState.tr;
 
   transaction.split(editorState.selection.from);
@@ -25,7 +27,7 @@ export const split = editorState => {
  * @param from {number}
  * @param to {number}
  */
-export const selectText = (editorState, from, to) => {
+export const selectText = (editorState: EditorState, from: number, to: number) => {
   const selection = TextSelection.create(editorState.doc, from, to);
   const transaction = editorState.tr;
   transaction.setSelection(selection);
@@ -37,7 +39,7 @@ export const selectText = (editorState, from, to) => {
  * @param editorState
  * @returns {EditorState}
  */
-export const clear = (editorState) => {
+export const clear = (editorState: EditorState) => {
   const selection = new AllSelection(editorState.doc);
   const transaction = editorState.tr;
   transaction.setSelection(selection);
@@ -50,7 +52,7 @@ export const clear = (editorState) => {
  * @param editorState
  * @returns {EditorState}
  */
-export const selectAll = (editorState) => {
+export const selectAll = (editorState: EditorState) => {
   const selection = new AllSelection(editorState.doc);
   const transaction = editorState.tr;
   transaction.setSelection(selection);
@@ -62,7 +64,7 @@ export const selectAll = (editorState) => {
  * @param editorState
  * @returns {EditorState}
  */
-export const deleteSelection = (editorState) => {
+export const deleteSelection = (editorState: EditorState) => {
   if (editorState.selection.empty) return editorState;
   const transaction = editorState.tr;
   transaction.deleteSelection().scrollIntoView();
@@ -78,7 +80,7 @@ export const deleteSelection = (editorState) => {
  * @param setSelection {boolean} Update the selection to select the changed content
  * @return {EditorState}
  */
-export const replaceTextAtPosition = (editorState, from, to, newText, setSelection = false) => {
+export const replaceTextAtPosition = (editorState: EditorState, from: number, to: number, newText: string, setSelection = false) => {
   const transaction = editorState.tr;
 
   transaction.replaceWith(from, to, editorState.schema.text(newText));
@@ -98,13 +100,16 @@ export const replaceTextAtPosition = (editorState, from, to, newText, setSelecti
  * @param attrs {Object}
  * @returns {EditorState}
  */
-export const toggleMark = (editorState, type, attrs = null) => {
-  let newEditorState;
+export const toggleMark = (editorState: EditorState, type: string, attrs = null): EditorState => {
+  let newEditorState: EditorState;
 
   const markType = editorState.schema.marks[type];
-  const dispatch = tr => newEditorState = editorState.apply(tr);
+  const dispatch = (tr: Transaction) => newEditorState = editorState.apply(tr);
 
-  if (commands.toggleMark(markType, attrs)(editorState, dispatch)) return newEditorState;
+  if (commands.toggleMark(markType, attrs)(editorState, dispatch)) {
+    //@ts-ignore
+    return newEditorState;
+  }
   else return editorState;
 };
 
@@ -113,7 +118,7 @@ export const toggleMark = (editorState, type, attrs = null) => {
  * @param editorState {EditorState}
  * @returns {EditorState}
  */
-export const toggleBold = (editorState) => {
+export const toggleBold = (editorState: EditorState) => {
   return toggleMark(editorState, "strong", null);
 };
 
@@ -122,7 +127,7 @@ export const toggleBold = (editorState) => {
  * @param editorState {EditorState}
  * @returns {EditorState}
  */
-export const toggleItalic = (editorState) => {
+export const toggleItalic = (editorState: EditorState) => {
   return toggleMark(editorState, "em", null);
 };
 
@@ -133,14 +138,19 @@ export const toggleItalic = (editorState) => {
  * @param attrs {Object}
  * @returns {EditorState}
  */
-export const setBlockType = (editorState, type, attrs) => {
-  let newEditorState;
+export const setBlockType = (editorState: EditorState, type: string, attrs: Object): EditorState => {
+  let newEditorState: EditorState;
 
   const nodeType = editorState.schema.nodes[type];
-  const dispatch = tr => newEditorState = editorState.apply(tr);
+  const dispatch = (tr: Transaction) => newEditorState = editorState.apply(tr);
 
-  if (commands.setBlockType(nodeType, attrs)(editorState, dispatch)) return newEditorState;
-  else return editorState;
+  if (commands.setBlockType(nodeType, attrs)(editorState, dispatch)) {
+    //@ts-ignore
+    return newEditorState;
+  }
+  else {
+    return editorState;
+  }
 };
 
 /**
@@ -151,7 +161,7 @@ export const setBlockType = (editorState, type, attrs) => {
  * @param to {number|null}
  * @returns {EditorState}
  */
-export const insertImage = (editorState, attrs, from = null, to = null) => {
+export const insertImage = (editorState: EditorState, attrs: Object, from: number | null = null, to: number | null = null) => {
 
   if (from === null) from = editorState.selection.anchor;
   if (to === null) to = editorState.selection.head;
@@ -163,3 +173,61 @@ export const insertImage = (editorState, attrs, from = null, to = null) => {
 
   return editorState.apply(transaction);
 };
+
+/**
+ * Sets the seleccion with underline tag
+ * @param editorState 
+ * @param attrs 
+ * @returns 
+ */
+export const toggleUnderline = (editorState: EditorState, attrs = null): EditorState => {
+  let newEditorState;
+  const dispatch = (tr: Transaction) => newEditorState = editorState.apply(tr);
+  const markType = editorState.schema.marks["underline"];
+  if (commands.toggleMark(markType, attrs)(editorState, dispatch)) {
+    //@ts-ignore
+    return newEditorState;
+  }
+  else {
+    return editorState;
+  }
+}
+
+/**
+ * Handler for prosemirror-history's undo command
+ * @param editorState current editor state
+ * @returns new editor State
+ */
+export const handleUndo = (editorState: EditorState): EditorState => {
+  let newEditorState: EditorState;
+  const dispatch = (tr: Transaction) => (newEditorState = editorState.apply(tr));
+
+  if (undo(editorState, dispatch)) {
+    //@ts-ignore
+    return newEditorState;
+  }
+  else {
+    return editorState;
+  }
+
+}
+
+/**
+ * Handler for prosemirror-history's redo command
+ * @param editorState current editor state
+ * @returns new editor State
+ */
+export const handleRedo = (editorState: EditorState): EditorState => {
+
+  let newEditorState: EditorState;
+  const dispatch = (tr: Transaction) => (newEditorState = editorState.apply(tr));
+
+  if (redo(editorState, dispatch)) {
+    //@ts-ignore
+    return newEditorState;
+  }
+  else {
+    return editorState;
+  }
+
+}

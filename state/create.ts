@@ -1,8 +1,10 @@
 import { EditorState, TextSelection } from "prosemirror-state";
-import { DOMParser, DOMSerializer } from "prosemirror-model";
+import { DOMParser } from "prosemirror-model";
 import { singleLineSchema, multiLineSchema, richTextSchema } from "./schemas";
 import { corePlugins } from '../helpers/plugins';
 import { richTextPlugins } from "../helpers"
+import type { Schema } from "prosemirror-model";
+import type { Plugin } from "prosemirror-state";
 
 /**
  * Create an empty editor state, for a single-line editor schema
@@ -33,7 +35,7 @@ export const createSingleLineEditor = (content = "", plugins = []) => {
  * @param plugins {array<Plugin>}
  * @return {EditorState}
  */
-export const createMultiLineEditor = (content = "", plugins = []) => {
+export const createMultiLineEditor = (content:string = "", plugins:Plugin[] = []) => {
   let doc, selection;
   
   if (content) {
@@ -41,7 +43,7 @@ export const createMultiLineEditor = (content = "", plugins = []) => {
     doc = multiLineSchema.node("doc", null,
       paragraphs.map(paragraph => {
         return multiLineSchema.node("paragraph", null,
-          paragraph ? [multiLineSchema.text(paragraph)] : null
+          paragraph ? [multiLineSchema.text(paragraph)] : undefined
         )
       })
     );
@@ -65,7 +67,7 @@ export const createMultiLineEditor = (content = "", plugins = []) => {
  * @param html {string}
  * @returns {Document}
  */
-const createDocumentFromHtml = (schema, html) => {
+const createDocumentFromHtml = (schema:Schema, html:string) => {
   const parser = DOMParser.fromSchema(schema);
   const node = document.createElement('div');
   node.innerHTML = html;

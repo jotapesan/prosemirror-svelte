@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
 
   import ProsemirrorEditor from "../../../ProsemirrorEditor.svelte";
-  import { createRichTextEditor, toJSON, clear, toggleMark, setBlockType } from "../../../state";
+  import { createRichTextEditor, toJSON, clear, toggleMark, setBlockType, toggleUnderline, handleUndo, handleRedo } from "../../../state";
   import { getCurrentMarks, getNodeTypeAtSelectionHead } from "../../../helpers";
 
   const html = "<h3>Welcome to Prosemirror Svelte</h3><p>Feel free to <b>edit me</b>!</p>";
@@ -31,11 +31,15 @@
     editorState = toggleMark(editorState, 'strong');
   }
 
+  function handleToggleUnderline(event) {
+    editorState = toggleUnderline(editorState);
+  }
+
   function handleSetBlockType(type, attrs = null) {
     return function (event) {
       editorState = setBlockType(editorState, type, attrs)
     }
-  }
+  } 
 
   function preventDefault(event) {
     event.preventDefault();
@@ -56,6 +60,7 @@
   $: nodeAtSelectionHead = editorState ? getNodeTypeAtSelectionHead(editorState) : {}
   $: activeBlockType = getBlockType(nodeAtSelectionHead)
   $: isBold = currentMarks && currentMarks.activeMarks && currentMarks.activeMarks.strong
+  $: isUnderline = currentMarks && currentMarks.activeMarks && currentMarks.activeMarks.underline
 
   onMount(() => focusEditor());
 
@@ -74,6 +79,9 @@
   <button style="margin-left: .5em" on:click={handleToggleBold} on:mousedown={preventDefault}>
       {#if isBold}Too bold for me{:else}Make it bold{/if}
   </button>
+  <button style="margin-left: .5em" on:click={handleToggleUnderline} on:mousedown={preventDefault}>
+    {#if isUnderline}Wow its underlined{:else}Make it underline{/if}
+</button>
 
   <button style="margin-left: .5em"
           disabled={activeBlockType==='paragraph'}
@@ -91,6 +99,12 @@
   <button disabled={activeBlockType==='heading-3'}
           on:click={handleSetBlockType('heading', {level:3})}
           on:mousedown={preventDefault}>h3</button>
+
+  <button on:click={(e)=>(editorState = handleUndo(editorState))}
+          on:mousedown={preventDefault}>undo</button>
+
+          <button on:click={(e)=>(editorState = handleRedo(editorState))}
+          on:mousedown={preventDefault}>redo</button>
 
 </div>
 

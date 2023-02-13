@@ -1,5 +1,7 @@
 import svelte from 'rollup-plugin-svelte';
 import resolve from '@rollup/plugin-node-resolve';
+import sveltePreprocess from 'svelte-preprocess';
+import typescript from '@rollup/plugin-typescript';
 import commonjs from '@rollup/plugin-commonjs';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
@@ -16,16 +18,17 @@ export default {
 		file: 'examples/public/build/bundle.js'
 	},
 	plugins: [
-		// css_only({output: 'example/public/editor.css'}),
-		
+		// css_only({output: 'example/public/editor.css'}),		
 		svelte({
 			// enable run-time checks when not in production
 			dev: !production,
 			// we'll extract any component CSS out into
 			// a separate file — better for performance
+
+			preprocess: sveltePreprocess(),			
 			css: css => {
 				css.write('examples/public/build/bundle.css');
-			}
+			}			
 		}),
 		
 		// If you have external dependencies installed from
@@ -37,6 +40,7 @@ export default {
 			browser: true,
 			dedupe: importee => importee === 'svelte' || importee.startsWith('svelte/')
 		}),
+		typescript(),
 		commonjs(),
 
 		// In dev mode, call `npm run start` once

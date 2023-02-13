@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import PlainTextEditor from "./components/PlainTextEditor.svelte";
 
   import RichTextEditor_101 from "./components/RichTextEditor_101.svelte";
