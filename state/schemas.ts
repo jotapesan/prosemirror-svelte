@@ -33,6 +33,8 @@ export const multiLineSchema = new Schema({
   }
 });
 
+const uDOM = ["u", 0]
+
 let customMarks = marks;
 //@ts-ignore
 customMarks.underline = {
@@ -40,12 +42,12 @@ customMarks.underline = {
     { tag: "u" }, { tag: "underline" },
     { style: "text-decoration=underline" }
   ],
-  toDOM() { return ["u", 0]; }
+  toDOM() { return uDOM; }
 };
 
-let customNodes = nodes;
+
 //@ts-ignore
-customNodes.tableNodes = tableNodes({
+let tn = tableNodes({
   tableGroup: 'block',
   cellContent: 'block+',
   cellAttributes: {
@@ -61,6 +63,9 @@ customNodes.tableNodes = tableNodes({
     },
   },
 });
+let customNodes = {...nodes, ...tn};
+
+
 
 /**
  * Schema to represent rich text

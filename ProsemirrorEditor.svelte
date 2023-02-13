@@ -16,14 +16,14 @@
 
   /** Reference to the editor view
    *  @type EditorView|null */
-  export let view = null
+  export let view:EditorView|null = null
 
   /** Debounce change events (set to zero for immediate updates) */
   export let debounceChangeEventsInterval = 50
 
   /** Reference to the editor component
    *  @type HTMLDivElement */
-  export let editor = null
+  export let editor:HTMLDivElement|null = null
 
   /** Initial EditorView props */
   export let editorViewProps = {}
@@ -39,7 +39,7 @@
   }
 
   /** Tracks the timeout id of the last time the change event was dispatched */
-  let dispatchLastEditTimeout
+  let dispatchLastEditTimeout:number|undefined = undefined;
 
   /** Tracks whether changes to editor state were not yet dispatched */
   let isDirty = false
@@ -49,7 +49,7 @@
   }
 
   /** Tracks whether the editor is empty (i.e. has a content size of 0) */
-  let editorIsEmpty
+  let editorIsEmpty:boolean;
   $: editorIsEmpty = editorState ? editorState.doc.content.size === 0
     || (editorState.doc.textContent === "" && editorState.doc.content.size < 3) : true
 
@@ -65,32 +65,37 @@
    * Captures custom events from plugins and dispatches them with a new event type (based on event.detail.type)
    * @param event {CustomEvent}
    */
-  const onCustomEvent = event => {
+  const onCustomEvent = (event:CustomEvent) => {
     if (event.detail) {
       const {type, ...detail} = event.detail
       dispatch(type || 'custom', detail)
     }
   }
-
+  
   onMount(() => {
-    view = new EditorView({mount: editor}, {
+    
+    view = new EditorView(
+    //@ts-ignore
+    {mount: editor}, {
         ...editorViewProps,
       state: editorState,
       dispatchTransaction: (transaction) => {
+        //@ts-ignore
         editorState = view.state.apply(transaction)
-
+        //@ts-ignore
         const contentHasChanged = !editorState.doc.eq(view.state.doc)
 
         if (contentHasChanged) {
           isDirty = true
           if (debounceChangeEventsInterval > 0) {
             if (dispatchLastEditTimeout) clearTimeout(dispatchLastEditTimeout)
+            //@ts-ignore
             dispatchLastEditTimeout = setTimeout(dispatchChangeEvent, 50)
           } else {
             setTimeout(dispatchChangeEvent, 0)
           }
         }
-
+        //@ts-ignore
         view.updateState(editorState)
 
         dispatch('transaction', {view, editorState, isDirty, contentHasChanged})
@@ -99,7 +104,7 @@
   })
 
   onDestroy(() => {
-    view.destroy()
+    view && view.destroy()
   })
 
 </script>
